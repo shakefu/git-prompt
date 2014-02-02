@@ -8,6 +8,10 @@ setup(
         author="Jacob Alheid",
         author_email="shakefu@gmail.com",
         packages=find_packages(),
+        install_requires=[
+            'pyconfig',
+            'blessings',
+            ],
         entry_points={
             'console_scripts':[
                 'gitprompt = gitprompt:main',
