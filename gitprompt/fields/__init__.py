@@ -14,20 +14,17 @@ from .base import Field
 
 class user(Field):
     """ Current username. """
-    def value(cls):
-        return pwd.getpwuid(os.getuid())[0]
+    value = pwd.getpwuid(os.getuid())[0]
 
 
 class host(Field):
     """ Current hostname. """
-    def value(cls):
-        return platform.node()
+    value = platform.node()
 
 
 class venv(Field):
     """ Current virtualenv name if it exists. """
-    def value(cls):
-        return os.path.basename(os.environ.get("VIRTUAL_ENV", ''))
+    value = os.path.basename(os.environ.get("VIRTUAL_ENV", ''))
 
 
 class cwd(Field):
@@ -35,6 +32,21 @@ class cwd(Field):
     value = os.getcwd()
     value = value.split('/')[-2:]
     value = os.path.join(*value)
+
+
+class time(Field):
+    """ Current time in 12-hour format. """
+    value = datetime.datetime.now().strftime("%I:%M:%S")
+
+
+class time_24(Field):
+    """ Current time in 24-hour format. """
+    value = datetime.datetime.now().strftime("%X")
+
+
+class time_utc(Field):
+    """ Current UTC time in 24-hour format. """
+    value = datetime.datetime.utcnow().strftime("%X")
 
 
 def get_fields():

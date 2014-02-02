@@ -4,51 +4,43 @@ import commands
 from .base import Field
 
 
+class repo(Field):
+    """ Current actual repo name from remote origin if in a git repo. """
+    error, text = commands.getstatusoutput(
+            "git remote show -n origin | grep Fetch")
+    if error:
+        value = ''
+    else:
+        value = text.split('/')[-1].split('.git')[0]
+
+
+class repo_lower(Field):
+    """ Current lower case repo name from remote origin if in a git repo. """
+    value = repo.value.lower()
+
+
 class branch(Field):
     """ Current git branch name if in a git repo. """
-    def value(cls):
-        status, text = commands.getstatusoutput(
-                "git rev-parse --abbrev-ref HEAD")
-        return text if not status else ''
+    error, text = commands.getstatusoutput(
+            "git rev-parse --abbrev-ref HEAD")
+    value = text if not error else ''
 
 
 class status(Field):
-    """ Current git status in short form if in a git repo.
-
-     M gitprompt/__init__.py
-    M  setup.py
-    ?? gitprompt/field.py
-
-    """
-    def value(cls):
-        status, text = commands.getstatusoutput(
-                "git -c color.ui=always status -s")
-        return text if not status else ''
-
-
-class all_changed(Field):
-    """ Return all changed lines, commited, staged, and unstaged.
-
-    ++74--32
-
-    """
-    def value(cls):
-        inserted, deleted = _lines_committed()
-
-        out = ''
-        if inserted:
-            out += '{c.green}++{c.normal}%s' % inserted
-        if deleted:
-            out += '{c.red}--{c.normal}%s' % deleted
-        return out
+    """ Current git status in short form if in a git repo. """
+    error, text = commands.getstatusoutput("git -c color.ui=always status -s")
+    if text:
+        value = '\n' + text.rstrip() if not error else ''
+    else:
+        value = ''
 
 
 def _lines_committed():
     """ Return a tuple of the number of changed lines in commits. """
-    status, text = commands.getstatusoutput(
+    error, text = commands.getstatusoutput(
             "git log --shortstat --branches --since='midnight' "
             "--author $(git config --get user.email)")
-    if status:
+    if error:
         return 0, 0
 
     inserted_count = 0
@@ -69,12 +61,54 @@ def _lines_committed():
     return inserted_count, deleted_count
 
 
-def _lines_staged():
+def _lines_uncommitted(staged=False):
     """ Return a tuple of the number of changed lines staged. """
+    cmd = "git diff --numstat"
+    if staged:
+        cmd += " --staged"
+    error, text = commands.getstatusoutput(cmd)
+    if error:
+        return 0, 0
+    inserted, deleted = 0, 0
+    for line in text.split('\n'):
+        if not line: continue
+        i, d, _ = line.split()
+        i = int(i)
+        d = int(d)
+        inserted += i
+        deleted += d
+
+    return inserted, deleted
 
 
-def _lines_unstaged():
-    """ Return a tuple of the number of changed lines that're unstaged. """
+def _format_lines_changed(inserted, deleted):
+    value = ''
+    if inserted:
+        value += '{c.green}++{c.normal}%s' % inserted
+    if deleted:
+        value += '{c.red}--{c.normal}%s' % deleted
+    return value
+
+
+class all_changes(Field):
+    """ Return all changed lines, commited, staged, and unstaged.
+
+    ++74--32
+
+    """
+    value = (_lines_committed(), _lines_uncommitted(),
+            _lines_uncommitted(staged=True))
+    value = map(lambda a, b, c: a + b + c, *value)
+    value = _format_lines_changed(*value)
+
+
+class committed_changes(Field):
+    """ Return commited changed lines.
+
+    ++74--32
+
+    """
+    value = _format_lines_changed(*_lines_committed())
 
 
 def get_fields():
@@ -84,6 +118,8 @@ def get_fields():
     """
     fields = globals().copy()
     for key in fields.keys():
+        if key.startswith('_'):
+            continue
         if not type(fields[key]) == Field.__metaclass__:
             del fields[key]
 
