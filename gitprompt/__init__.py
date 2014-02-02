@@ -7,8 +7,6 @@ import pyconfig
 import blessings
 
 from . import fields
-# Preload so available as attribute on fields
-from .fields import git
 
 
 def get_prompt():

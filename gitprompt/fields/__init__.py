@@ -8,6 +8,7 @@ import pwd
 import datetime
 import platform
 
+from . import git
 from .base import Field
 
 
@@ -33,7 +34,7 @@ class cwd(Field):
     """ Current directory, last two path members. """
     value = os.getcwd()
     value = value.split('/')[-2:]
-    value = '/'.join(value)
+    value = os.path.join(*value)
 
 
 def get_fields():
@@ -41,12 +42,12 @@ def get_fields():
     Return all the fields defined or imported into this module.
 
     """
+    submodules = ['git']
     fields = globals().copy()
     for key in fields.keys():
+        if key in submodules:
+            continue
         if not type(fields[key]) == Field.__metaclass__:
             del fields[key]
-
-    from . import git
-    fields['git'] = git
 
     return fields
