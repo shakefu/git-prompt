@@ -26,9 +26,9 @@ def get_prompt():
     if fields.git.branch:
         prompt += " {git.branch}"
         prompt += " {git.all_changed}"
-        prompt += "\n\r{git.status}"
-    prompt += "\n\r{cwd}"
-    prompt += "\n\r"
+        prompt += "\n{git.status}"
+    prompt += "\n{cwd}"
+    prompt += "\n"
     return prompt
 
 
