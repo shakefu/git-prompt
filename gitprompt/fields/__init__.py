@@ -5,6 +5,7 @@ Prompt Fields
 """
 import os
 import pwd
+import commands
 import datetime
 import platform
 
@@ -28,6 +29,15 @@ class venv(Field):
 
 
 class cwd(Field):
+    """ Current directory. """
+    error, text = commands.getstatusoutput("pwd")
+    if error:
+        value = os.getcwd()
+    else:
+        value = text.strip()
+
+
+class cwd_short(Field):
     """ Current directory, last two path members. """
     value = os.getcwd()
     value = value.split('/')[-2:]
