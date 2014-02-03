@@ -18,13 +18,13 @@ def default_prompt(f):
     prompt = "\r{c.cyan}{user}{c.normal}@{host} {time}"
 
     if f.venv:
-        if f.venv and str(f.git.repo).lower() != str(f.venv).lower():
+        if f.venv and f.git.repo != f.venv:
             prompt += " {c.yellow}{venv}{c.normal}"
         else:
             prompt += " {venv}"
 
     if f.git.repo:
-        if f.venv and str(f.git.repo).lower() != str(f.venv).lower():
+        if f.venv and f.git.repo != f.venv:
             prompt += " {c.yellow}{git.repo}{c.normal}"
         else:
             prompt += " {git.repo}"
