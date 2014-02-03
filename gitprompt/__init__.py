@@ -8,7 +8,7 @@ import argparse
 import pyconfig
 import blessings
 
-from . import fields
+from gitprompt import fields
 
 
 DEBUG = False

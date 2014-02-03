@@ -1,7 +1,7 @@
 import re
 import commands
 
-from .base import Field
+from gitprompt.fields.base import Field
 
 
 class repo(Field):

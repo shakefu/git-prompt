@@ -8,8 +8,8 @@ import pwd
 import datetime
 import platform
 
-from . import git
-from .base import Field
+from gitprompt.fields import git
+from gitprompt.fields.base import Field
 
 
 class user(Field):
