@@ -55,7 +55,7 @@ def shakefus_prompt(f):
         venv_color = "{c.magenta}"
 
     # Venv
-    width = 18
+    width = 24
     padding = padding[width - 1:]
     if f.venv:
         venv = "═" * (width - len(" (" + str(f.venv) + ") "))
@@ -137,9 +137,6 @@ def shakefus_prompt(f):
     prompt += " {line_color}╘══{c.normal} " + middle + " {line_color}══──{c.normal}"
 
     return prompt
-
-
-pyconfig.set('gitprompt.prompt', shakefus_prompt)
 
 
 def get_prompt(args):
