@@ -73,8 +73,10 @@ def _lines_uncommitted(staged=False):
     for line in text.split('\n'):
         if not line: continue
         i, d, _ = line.split()
-        i = int(i)
-        d = int(d)
+        try:
+            i, d = int(i), int(d)
+        except:
+            i, d = 0, 0
         inserted += i
         deleted += d
 
