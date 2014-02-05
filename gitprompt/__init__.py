@@ -55,22 +55,27 @@ def shakefus_prompt(f):
         venv_color = "{c.magenta}"
 
     # Venv
-    width = 24
-    padding = padding[width - 1:]
+    width = 12
     if f.venv:
-        venv = "═" * (width - len(" (" + str(f.venv) + ") "))
+        length = len(" (" + str(f.venv) + ") ")
+        if length > width:
+            width = length + 1
+        venv = "═" * (width - length)
         venv = "{line_color}" + venv + "{c.normal}"
         venv = (" {c.yellow}(" + venv_color + "{venv}{c.yellow}){c.normal} "
                 + venv)
     else:
         venv = "{line_color}═{c.normal}" * width
+    padding = padding[width - 1:]
 
     # Repo/Branch
-    width = 30
-    padding = padding[width:]
+    width = 20
     if f.git.repo:
         git = ' %s/%s ' % (f.git.repo, f.git.branch) + '== '
-        git = "═" * (width - len(git))
+        length = len(git)
+        if length > width:
+            width = length + 1
+        git = "═" * (width - length)
         git = "{line_color}" + git + "{c.normal}"
         git = (git + " " + repo_color
                 + "{git.repo}{c.yellow}/{c.normal}{git.branch} ")
@@ -80,6 +85,7 @@ def shakefus_prompt(f):
             git += "{line_color}═══{c.normal}"
     else:
         git = "{line_color}═{c.normal}" * width
+    padding = padding[width:]
 
     # Changes
     width = 12
