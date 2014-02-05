@@ -11,7 +11,11 @@ class repo(Field):
     if error:
         value = ''
     else:
-        value = text.split('/')[-1].split('.git')[0]
+        if not text.endswith('.git'):
+            # This may happen if there's not a remote set up for the repo
+            value = text.split()[-1]
+        else:
+            value = text.split('/')[-1].split('.git')[0]
 
 
 class repo_lower(Field):
