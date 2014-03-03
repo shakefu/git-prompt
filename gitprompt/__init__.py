@@ -88,7 +88,7 @@ def shakefus_prompt(f):
     padding = padding[width:]
 
     # Changes
-    width = 12
+    width = 16
     padding = padding[width:]
     if f.git.all_changes:
         changes = str(f.git.all_changes).format(c=no_color) + " "
