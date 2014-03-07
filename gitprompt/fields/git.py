@@ -39,6 +39,30 @@ class status(Field):
         value = ''
 
 
+class flake_status(Field):
+    """ Current git status with extra information if there are pyflakes
+    violations. """
+    error, text = commands.getstatusoutput("git -c color.ui=always status -s")
+    if error or not text:
+        value = ''
+    else:
+        value = text.split('\n')
+        for i in xrange(len(value)):
+            line = value[i]
+            filename = line.split()[-1]
+            if filename.endswith('.py'):
+                error, text = commands.getstatusoutput("pyflakes " + filename)
+                if error:
+                    value[i] = '{c.bold_yellow}!{c.normal}' + value[i]
+                else:
+                    value[i] = ' ' + value[i]
+            else:
+                value[i] = ' ' + value[i]
+
+        value = '\n'.join(value)
+        # value = '\n' + text.rstrip() if not error else ''
+
+
 def _lines_committed():
     """ Return a tuple of the number of changed lines in commits. """
     error, text = commands.getstatusoutput(

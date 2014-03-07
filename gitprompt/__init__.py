@@ -42,7 +42,7 @@ def default_prompt(f):
 def shakefus_prompt(f):
     console_width = int(os.environ.get('COLUMNS'))
     decor = 10
-    term = blessings.Terminal(force_styling=True)
+    # term = blessings.Terminal(force_styling=True)
     no_color = blessings.Terminal(force_styling=None)
 
     # Top line
@@ -108,9 +108,18 @@ def shakefus_prompt(f):
     # Git status
     padding = " " * (console_width - decor)
 
+    '''
     if f.git.status:
         git_offset = 0
         status = str(f.git.status)
+        for line in status.split('\n'):
+            if not line.strip():
+                continue
+            prompt += " {line_color}│{c.normal}" + " " * git_offset + line + "\n"
+    '''
+    if f.git.flake_status:
+        git_offset = 0
+        status = str(f.git.flake_status)
         for line in status.split('\n'):
             if not line.strip():
                 continue
