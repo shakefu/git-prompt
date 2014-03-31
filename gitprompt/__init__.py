@@ -10,9 +10,6 @@ import argparse
 import pyconfig
 import blessings
 
-from gitprompt import fields
-
-
 DEBUG = False
 
 
@@ -156,6 +153,10 @@ def shakefus_prompt(f):
 
 def get_prompt(args):
     """ Return a prompt ready to be formatted. """
+    # Late import 'cause this actually does a bunch of work, and we want to
+    # catch exceptions that happen in its loading, further up the call stack
+    from gitprompt import fields
+
     # Allow overriding with pyconfig
     prompt = pyconfig.get('gitprompt.prompt', default_prompt)
 
@@ -172,28 +173,45 @@ def get_prompt(args):
         return prompt
 
 
-def main():
-    # Handle command line arguments
+def _get_args():
+    """ Return parsed command line arguments. """
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--debug',
             help="enable debug output",
             action='store_true')
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    # Get our color helper - thanks blessings
-    term = blessings.Terminal(force_styling=True)
 
-    # Get our prompt and make sure it's a string
-    prompt = get_prompt(args)
+def main():
+    try:
+        # Get the args
+        args = _get_args()
+    except:
+        print ''
+        return
 
-    # Only do this extra check if we're not in debug mode, so a bad prompt will
-    # raise up an informative exception
-    if not args.debug:
-        if not isinstance(prompt, basestring):
-            return ''
+    try:
+        # Get our color helper - thanks blessings
+        term = blessings.Terminal(force_styling=True)
+        # Get our prompt and make sure it's a string
+        prompt = get_prompt(args)
+
+        # Only do this extra check if we're not in debug mode, so a bad prompt will
+        # raise up an informative exception
+        if not args.debug:
+            if not isinstance(prompt, basestring):
+                return ''
+    except:
+        if args.debug:
+            raise
+        prompt = ''
 
     # Format our prompt, woot!
     try:
+        # Late import 'cause this actually does a bunch of work, and we want to
+        # catch exceptions that happen in its loading
+        from gitprompt import fields
+
         format_context = pyconfig.get('gitprompt.custom_context', {})
         format_context.update(fields.get_fields())
         format_context.setdefault('line_color', term.color(105))
