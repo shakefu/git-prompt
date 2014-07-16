@@ -132,8 +132,12 @@ def shakefus_prompt(f):
     padding = padding[len(cwd + " ==--"):]
     if cwd != '/':
         cwd = cwd.split('/')
-        base = os.path.join(*cwd[:-2]).replace('/', '{c.yellow}/{c.bold_black}')
-        cwd = os.path.join(*cwd[-2:]).replace('/', '{c.yellow}/{c.white}')
+        if len(cwd) > 2:
+            base = os.path.join(*cwd[:-2]).replace('/', '{c.yellow}/{c.bold_black}')
+            cwd = os.path.join(*cwd[-2:]).replace('/', '{c.yellow}/{c.white}')
+        else:
+            base = ''
+            cwd = os.path.join(*cwd[-2:]).replace('/', '{c.yellow}/{c.white}')
         cwd = '{c.yellow}/{c.bold_black}' + os.path.join(base, cwd)
         cwd = cwd + '{c.normal}'
     else:
