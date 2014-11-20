@@ -155,6 +155,113 @@ def shakefus_prompt(f):
     return prompt
 
 
+def shakefus_prompt2(f):
+    console_width = int(os.environ.get('COLUMNS'))
+    decor = 10
+    # term = blessings.Terminal(force_styling=True)
+    no_color = blessings.Terminal(force_styling=None)
+
+    # Top line
+    padding = " " * (console_width - decor)
+
+    if f.venv and f.venv != f.git.repo:
+        repo_color = venv_color = "{c.red}"
+    else:
+        repo_color = "{c.cyan}"
+        venv_color = "{c.magenta}"
+
+    # Venv
+    width = 12
+    if f.venv:
+        length = len(" (" + str(f.venv) + ") ")
+        if length > width:
+            width = length + 1
+        venv = "═" * (width - length)
+        venv = "{line_color}" + venv + "{c.normal}"
+        venv = (" {c.yellow}(" + venv_color + "{venv}{c.yellow}){c.normal} "
+                + venv)
+    else:
+        venv = "{line_color}═{c.normal}" * width
+    padding = padding[width - 1:]
+
+    # Repo/Branch
+    width = 20
+    if f.git.repo:
+        git = ' %s/%s ' % (f.git.repo, f.git.branch) + '== '
+        length = len(git)
+        if length > width:
+            width = length + 1
+        git = "═" * (width - length)
+        git = "{line_color}" + git + "{c.normal}"
+        git = (git + " " + repo_color
+                + "{git.repo}{c.yellow}/{c.normal}{git.branch} ")
+        if f.git.all_changes:
+            git += "{line_color}══{c.normal} "
+        else:
+            git += "{line_color}═══{c.normal}"
+    else:
+        git = "{line_color}═{c.normal}" * width
+    padding = padding[width:]
+
+    # Changes
+    width = 16
+    padding = padding[width:]
+    if f.git.all_changes:
+        changes = str(f.git.all_changes).format(c=no_color) + " "
+        changes = "═" * (width - len(changes))
+        changes = str(f.git.all_changes) + " {line_color}" + changes + "{c.normal}"
+    else:
+        changes = "{line_color}═{c.normal}" * width
+
+    middle = venv + git + changes
+    prompt =  "\r {line_color}╒══{c.normal}" + middle + "{line_color}══──{c.normal}\n"
+    # Git status
+    padding = " " * (console_width - decor)
+
+    '''
+    if f.git.status:
+        git_offset = 0
+        status = str(f.git.status)
+        for line in status.split('\n'):
+            if not line.strip():
+                continue
+            prompt += " {line_color}│{c.normal}" + " " * git_offset + line + "\n"
+    '''
+    if f.git.flake_status:
+        git_offset = 0
+        status = str(f.git.flake_status)
+        for line in status.split('\n'):
+            if not line.strip():
+                continue
+            prompt += " {line_color}│{c.normal}" + " " * git_offset + line + "\n"
+
+    # Bottom line
+    padding = " " * (console_width - decor)
+
+    # Current directory
+    cwd = str(f.cwd)
+    while len(cwd) > len(padding):
+        cwd = os.path.join(*cwd.split('/')[1:])
+    padding = padding[len(cwd + " ==--"):]
+    if cwd != '/':
+        cwd = cwd.split('/')
+        if len(cwd) > 2:
+            base = os.path.join(*cwd[:-2]).replace('/', '{c.yellow}/{c.bold_black}')
+            cwd = os.path.join(*cwd[-2:]).replace('/', '{c.yellow}/{c.white}')
+        else:
+            base = ''
+            cwd = os.path.join(*cwd[-2:]).replace('/', '{c.yellow}/{c.white}')
+        cwd = '{c.yellow}/{c.bold_black}' + os.path.join(base, cwd)
+        cwd = cwd + '{c.normal}'
+    else:
+        cwd = '{c.red}/{c.normal}'
+
+    middle = cwd
+    prompt += " {line_color}╘══{c.normal} " + middle + " {line_color}══──{c.normal}"
+
+    return prompt
+
+
 def get_prompt(args):
     """ Return a prompt ready to be formatted. """
     # Late import 'cause this actually does a bunch of work, and we want to
